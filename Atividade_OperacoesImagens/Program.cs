@@ -14,8 +14,8 @@ namespace Atividade_OperacoesImagens
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new formOperacoesImagensNBIS());
-            Application.Run(new formOperacoesImagensVALID());
+            Application.Run(new formOperacoesImagensNBIS());
+            //Application.Run(new formOperacoesImagensVALID());
         }
     }
 }

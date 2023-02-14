@@ -4,12 +4,13 @@ using Valid.WSQ.Services.Contracts;
 using Valid.WSQ.Services;
 using Valid.Logging.Infrastructure.Services;
 using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace Atividade_OperacoesImagens.Componentes
 {
     public class ConversoesImagem
     {
-        public static Byte[] WSQParaByteArray(Byte[] wsq, System.Drawing.Imaging.ImageFormat formato)
+        public static byte[] WSQParaByteArray(byte[] wsq, ImageFormat formato)
         {
             try
             {
@@ -27,7 +28,25 @@ namespace Atividade_OperacoesImagens.Componentes
             }
         }
 
-        public static Byte[] ByteArrayParaWSQ(Byte[] imagem, System.Drawing.Imaging.ImageFormat formato)
+        public static Image WSQParaImagem(byte[] wsq, ImageFormat formato)
+        {
+            try
+            {
+                var log = new NLogLoggingService();
+                IWSQ objWSQ = new MultiThreadWSQ(log);
+
+                //Descompacta WSQ para o formato escolhido
+                var task = Task.Run(() => objWSQ.ExtractWSQToImage(wsq, formato));
+                task.Wait();
+                return task.Result;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public static byte[] ByteArrayParaWSQ(byte[] imagem)
         {
             try
             {

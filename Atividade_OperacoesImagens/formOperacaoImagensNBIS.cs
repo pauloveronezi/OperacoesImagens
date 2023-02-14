@@ -20,7 +20,7 @@ namespace Atividade_OperacoesImagens
 
         private void btnOpenFileA_Click(object sender, EventArgs e)
         {
-            openFile.Filter = "Image Files|*.bmp;*.wsq";
+            openFile.Filter = "Image Files|*.bmp;*.wsq;*.jpg";
 
             if (openFile.ShowDialog() == DialogResult.OK)
             {
@@ -131,7 +131,7 @@ namespace Atividade_OperacoesImagens
                     _imagem = new Bitmap(_memoria);
                 }
 
-                var _minuciaImagem = DetectMinutiae.FromBitmap(_imagem, 500);
+                //var _minuciaImagem = DetectMinutiae.FromBitmap(_imagem, 500);
                 var _arquivoConvertido = Wsq.FromBitmapToWsq(_imagem, (float)0.75, 500, "Teste"); //75% é o padrão para compressão do arquivo
 
                 var _arquivoSave = $"{_localArquivos}BMPtoWSQ{DateTime.Now:ddMMyyyyhhmmss}.wsq";
@@ -230,12 +230,86 @@ namespace Atividade_OperacoesImagens
             }
         }
 
+        //private void CutFingerFile()
+        //{
+        //    try
+        //    {
+        //        #region Convertendo o arquivo WSQ para Bitmap
+
+        //        var _arquivo = new StreamReader(txtFileA.Text);
+        //        var _arquivoBytes = default(byte[]);
+
+        //        using (var _memoria = new MemoryStream())
+        //        {
+        //            _arquivo.BaseStream.CopyTo(_memoria);
+        //            _arquivoBytes = _memoria.ToArray();
+        //        }
+
+        //        var _arquivoConvertido = Wsq.FromWsqToBitmap(_arquivoBytes);
+
+        //        #endregion
+
+        //        // só realizo o recorte em imagens originais - essa cláusula não deixam imagens já recortadas serem recortadas novamente
+        //        if (_arquivoConvertido.Size.Width > 512 && _arquivoConvertido.Size.Height > 512)
+        //        {
+        //            #region Calculando posição para recorte da imagem
+
+        //            var _imagemNova = default(Bitmap);
+        //            Graphics _graphics = null;
+        //            var _sizeImageRes = new Size(512, 512);
+        //            var _posicaoInicial = default(Point);
+        //            var _posicaoFinal = default(Point);
+
+        //            _arquivoConvertido.SetResolution(512, 512);
+
+        //            _imagemNova = new Bitmap(512, 512, PixelFormat.Format24bppRgb); //estava com: Format24bppRgb
+        //            _imagemNova.SetResolution(512, 512);
+        //            _graphics = Graphics.FromImage(_imagemNova);
+        //            _graphics.Clear(Color.White);
+        //            _graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+        //            CalcularPosicao(_arquivoConvertido.Size, _sizeImageRes, ref _posicaoInicial, ref _posicaoFinal);
+
+        //            var _retangulo = new Rectangle(_posicaoInicial.X, _posicaoInicial.Y, _sizeImageRes.Width, _sizeImageRes.Height);
+        //            _graphics.DrawImage(_arquivoConvertido, _posicaoFinal.X, _posicaoFinal.Y, _retangulo, GraphicsUnit.Pixel);
+        //            _imagemNova.SetResolution(512, 512);
+
+        //            #endregion
+
+        //            //convertendo a imagem de 24bpp para escala de cinza
+        //            var _arquivoGrayScale = ConvertToGrayScale(_imagemNova);
+
+        //            #region Convertendo a imagem de BMP para WSQ
+
+        //            Bitmap _imagemBMPGrayScale;
+
+        //            using (var _memoria = new MemoryStream(_arquivoGrayScale))
+        //            {
+        //                _imagemBMPGrayScale = new Bitmap(_memoria);
+        //            }
+
+        //            var _minuciaImagem = DetectMinutiae.FromBitmap(_imagemBMPGrayScale, 512);
+        //            var _arquivoConvertidoWSQ = Wsq.FromBitmapToWsq(_imagemBMPGrayScale, (float)0.75, 512, "Teste"); //75% é o padrão para compressão do arquivo
+
+        //            var _arquivoSaveWSQ = $"{_localArquivos}RecorteDigital/RecorteDigitalWSQ{DateTime.Now:ddMMyyyyhhmmss}.wsq";
+
+        //            using (var _fileStream = File.Create(_arquivoSaveWSQ))
+        //            {
+        //                _fileStream.Write(_arquivoConvertidoWSQ, 0, _arquivoConvertidoWSQ.Length);
+        //            }
+
+        //            #endregion
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
         private void CutFingerFile()
         {
             try
             {
-                #region Convertendo o arquivo WSQ para Bitmap
-
                 var _arquivo = new StreamReader(txtFileA.Text);
                 var _arquivoBytes = default(byte[]);
 
@@ -245,60 +319,52 @@ namespace Atividade_OperacoesImagens
                     _arquivoBytes = _memoria.ToArray();
                 }
 
-                var _arquivoConvertido = Wsq.FromWsqToBitmap(_arquivoBytes);
+                Bitmap _imagemBMPInicial;
+
+                using (var _memoria = new MemoryStream(_arquivoBytes))
+                {
+                    _imagemBMPInicial = new Bitmap(_memoria);
+                }
+
+                var _imagemNova = default(Bitmap);
+                Graphics _graphics = null;
+                var _sizeImageRes = new Size(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height);
+                var _posicaoInicial = default(Point);
+                var _posicaoFinal = default(Point);
+
+                _imagemBMPInicial.SetResolution(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height);
+
+                _imagemNova = new Bitmap(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height, PixelFormat.Format24bppRgb); //estava com: Format24bppRgb
+                _imagemNova.SetResolution(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height);
+                _graphics = Graphics.FromImage(_imagemNova);
+                _graphics.Clear(Color.White);
+                _graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+
+                var _retangulo = new Rectangle(_posicaoInicial.X, _posicaoInicial.Y, _sizeImageRes.Width, _sizeImageRes.Height);
+                _graphics.DrawImage(_imagemBMPInicial, _posicaoFinal.X, _posicaoFinal.Y, _retangulo, GraphicsUnit.Pixel);
+                _imagemNova.SetResolution(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height);
+
+                var _arquivoGrayScale = ConvertToGrayScale(_imagemNova);
+
+                #region Convertendo a imagem de BMP para WSQ
+
+                Bitmap _imagemBMPGrayScale;
+
+                using (var _memoria = new MemoryStream(_arquivoGrayScale))
+                {
+                    _imagemBMPGrayScale = new Bitmap(_memoria);
+                }                
+
+                var _arquivoConvertidoWSQ = Wsq.FromBitmapToWsq(_imagemBMPGrayScale, (float)0.75, _imagemBMPInicial.Size.Width, "Teste"); //75% é o padrão para compressão do arquivo
+
+                var _arquivoSaveWSQ = $"{_localArquivos}RecorteDigital/RecorteDigitalWSQ{DateTime.Now:ddMMyyyyhhmmss}.wsq";
+
+                using (var _fileStream = File.Create(_arquivoSaveWSQ))
+                {
+                    _fileStream.Write(_arquivoConvertidoWSQ, 0, _arquivoConvertidoWSQ.Length);
+                }
 
                 #endregion
-
-                // só realizo o recorte em imagens originais - essa cláusula não deixam imagens já recortadas serem recortadas novamente
-                if (_arquivoConvertido.Size.Width > 512 && _arquivoConvertido.Size.Height > 512)
-                {
-                    #region Calculando posição para recorte da imagem
-
-                    var _imagemNova = default(Bitmap);
-                    Graphics _graphics = null;
-                    var _sizeImageRes = new Size(512, 512);
-                    var _posicaoInicial = default(Point);
-                    var _posicaoFinal = default(Point);
-
-                    _arquivoConvertido.SetResolution(512, 512);
-
-                    _imagemNova = new Bitmap(512, 512, PixelFormat.Format24bppRgb); //estava com: Format24bppRgb
-                    _imagemNova.SetResolution(512, 512);
-                    _graphics = Graphics.FromImage(_imagemNova);
-                    _graphics.Clear(Color.White);
-                    _graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                    CalcularPosicao(_arquivoConvertido.Size, _sizeImageRes, ref _posicaoInicial, ref _posicaoFinal);
-
-                    var _retangulo = new Rectangle(_posicaoInicial.X, _posicaoInicial.Y, _sizeImageRes.Width, _sizeImageRes.Height);
-                    _graphics.DrawImage(_arquivoConvertido, _posicaoFinal.X, _posicaoFinal.Y, _retangulo, GraphicsUnit.Pixel);
-                    _imagemNova.SetResolution(512, 512);
-
-                    #endregion
-
-                    //convertendo a imagem de 24bpp para escala de cinza
-                    var _arquivoGrayScale = ConvertToGrayScale(_imagemNova);
-
-                    #region Convertendo a imagem de BMP para WSQ
-
-                    Bitmap _imagemBMPGrayScale;
-
-                    using (var _memoria = new MemoryStream(_arquivoGrayScale))
-                    {
-                        _imagemBMPGrayScale = new Bitmap(_memoria);
-                    }
-
-                    var _minuciaImagem = DetectMinutiae.FromBitmap(_imagemBMPGrayScale, 512);
-                    var _arquivoConvertidoWSQ = Wsq.FromBitmapToWsq(_imagemBMPGrayScale, (float)0.75, 512, "Teste"); //75% é o padrão para compressão do arquivo
-
-                    var _arquivoSaveWSQ = $"{_localArquivos}RecorteDigital/RecorteDigitalWSQ{DateTime.Now:ddMMyyyyhhmmss}.wsq";
-
-                    using (var _fileStream = File.Create(_arquivoSaveWSQ))
-                    {
-                        _fileStream.Write(_arquivoConvertidoWSQ, 0, _arquivoConvertidoWSQ.Length);
-                    }
-
-                    #endregion
-                }
             }
             catch (Exception ex)
             {

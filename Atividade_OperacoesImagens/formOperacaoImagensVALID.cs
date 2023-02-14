@@ -91,28 +91,34 @@ namespace Atividade_OperacoesImagens
 
         private void ConvertFileWSQtoBMP()
         {
-            //try
-            //{
-            //    var _arquivo = new StreamReader(txtFileA.Text);
-            //    var _arquivoBytes = default(byte[]);
+            try
+            {
+                var _arquivo = new StreamReader(txtFileA.Text);
+                var _arquivoBytes = default(byte[]);
 
-            //    using (var _memoria = new MemoryStream())
-            //    {
-            //        _arquivo.BaseStream.CopyTo(_memoria);
-            //        _arquivoBytes = _memoria.ToArray();
-            //    }
+                using (var _memoria = new MemoryStream())
+                {
+                    _arquivo.BaseStream.CopyTo(_memoria);
+                    _arquivoBytes = _memoria.ToArray();
+                }
 
-            //    var _arquivoConvertido = Wsq.FromWsqToBitmap(_arquivoBytes);
+                var _teste = ConversoesImagem.WSQParaImagem(_arquivoBytes, ImageFormat.Png);
 
-            //    var _arquivoSave = $"{_localArquivos}WSQtoBMP{DateTime.Now:ddMMyyyyhhmmss}.bmp";
-            //    _arquivoConvertido.Save(_arquivoSave, ImageFormat.Bmp);
+                var _bytesJPG = ConversoesImagem.WSQParaByteArray(_arquivoBytes, ImageFormat.Png);
 
-            //    txtFileResult.Text = $"Arquivo processado com sucesso! Local: {_arquivoSave}";
-            //}
-            //catch (Exception ex)
-            //{
-            //    txtFileResult.Text = $"Erro ao converter o arquivo. Erro: {ex}";
-            //}
+                var _arquivoSave = $"{_localArquivos}WSQtoJPG{DateTime.Now:ddMMyyyyhhmmss}.wsq";
+
+                using (var _fileStream = File.Create(_arquivoSave))
+                {
+                    _fileStream.Write(_arquivoBytes, 0, _arquivoBytes.Length);
+                }
+
+                txtFileResult.Text = $"Arquivo processado com sucesso! Local: {_arquivoSave}";
+            }
+            catch (Exception ex)
+            {
+                txtFileResult.Text = $"Erro ao converter o arquivo. Erro: {ex}";
+            }
         }
 
         private void ConvertFileBMPtoWSQ()
