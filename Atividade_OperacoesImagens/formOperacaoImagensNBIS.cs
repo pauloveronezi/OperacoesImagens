@@ -2,10 +2,12 @@
 using Nbis;
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Atividade_OperacoesImagens
 {
@@ -20,7 +22,7 @@ namespace Atividade_OperacoesImagens
 
         private void btnOpenFileA_Click(object sender, EventArgs e)
         {
-            openFile.Filter = "Image Files|*.bmp;*.wsq;*.jpg";
+            openFile.Filter = "Image Files|*.bmp;*.wsq;*.jpg;*.jfif";
 
             if (openFile.ShowDialog() == DialogResult.OK)
             {
@@ -306,70 +308,151 @@ namespace Atividade_OperacoesImagens
         //    }
         //}
 
+        //private void CutFingerFile()
+        //{
+        //    try
+        //    {
+        //        var _arquivo = new StreamReader(txtFileA.Text);
+        //        var _arquivoBytes = default(byte[]);
+
+        //        using (var _memoria = new MemoryStream())
+        //        {
+        //            _arquivo.BaseStream.CopyTo(_memoria);
+        //            _arquivoBytes = _memoria.ToArray();
+        //        }
+
+        //        Bitmap _imagemBMPInicial;
+
+        //        using (var _memoria = new MemoryStream(_arquivoBytes))
+        //        {
+        //            _imagemBMPInicial = new Bitmap(_memoria);
+        //        }
+
+        //        var _imagemNova = default(Bitmap);
+        //        Graphics _graphics = null;
+        //        var _sizeImageRes = new Size(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height);
+        //        var _posicaoInicial = default(Point);
+        //        var _posicaoFinal = default(Point);
+
+        //        _imagemBMPInicial.SetResolution(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height);
+
+        //        _imagemNova = new Bitmap(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height, PixelFormat.Format24bppRgb); //estava com: Format24bppRgb
+        //        _imagemNova.SetResolution(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height);
+        //        _graphics = Graphics.FromImage(_imagemNova);
+        //        _graphics.Clear(Color.White);
+        //        _graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+
+        //        var _retangulo = new Rectangle(_posicaoInicial.X, _posicaoInicial.Y, _sizeImageRes.Width, _sizeImageRes.Height);
+        //        _graphics.DrawImage(_imagemBMPInicial, _posicaoFinal.X, _posicaoFinal.Y, _retangulo, GraphicsUnit.Pixel);
+        //        _imagemNova.SetResolution(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height);
+
+        //        var _arquivoGrayScale = ConvertToGrayScale(_imagemNova);
+
+        //        #region Convertendo a imagem de BMP para WSQ
+
+        //        Bitmap _imagemBMPGrayScale;
+
+        //        using (var _memoria = new MemoryStream(_arquivoGrayScale))
+        //        {
+        //            _imagemBMPGrayScale = new Bitmap(_memoria);
+        //        }                
+
+        //        var _arquivoConvertidoWSQ = Wsq.FromBitmapToWsq(_imagemBMPGrayScale, (float)0.75, _imagemBMPInicial.Size.Width, "Teste"); //75% é o padrão para compressão do arquivo
+
+        //        var _arquivoSaveWSQ = $"{_localArquivos}RecorteDigital/RecorteDigitalWSQ{DateTime.Now:ddMMyyyyhhmmss}.wsq";
+
+        //        using (var _fileStream = File.Create(_arquivoSaveWSQ))
+        //        {
+        //            _fileStream.Write(_arquivoConvertidoWSQ, 0, _arquivoConvertidoWSQ.Length);
+        //        }
+
+        //        #endregion
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
+        //private void CutFingerFile()
+        //{
+        //    try
+        //    {
+        //        byte[] imagem;
+        //        Graphics g = null;
+        //        Bitmap _bmp = null;
+        //        string textoAnomalia = "NÃO ASSINOU NESSE ATO";
+
+        //        _bmp = new Bitmap(550, 117);
+        //        g = Graphics.FromImage(_bmp);
+        //        g.FillRectangle(Brushes.White, new Rectangle(0, 0, 550, 117));
+        //        Font ft = new Font("Tahoma", 28, FontStyle.Bold);
+        //        StringFormat sf = new StringFormat
+        //        {
+        //            Alignment = StringAlignment.Center,
+        //            LineAlignment = StringAlignment.Center
+        //        };
+        //        Rectangle r = new Rectangle(0, 0, _bmp.Width, ft.Height * 3);
+        //        g.DrawString(textoAnomalia, ft, Brushes.Black, r, sf);
+        //        g.DrawImage(_bmp, 0, 0);
+
+        //        using (MemoryStream ms = new MemoryStream())
+        //        {
+        //            _bmp.Save(ms, ImageFormat.Png);
+        //            imagem = ms.ToArray();
+        //        }
+
+        //        var _arquivoSave = $"{_localArquivos}NaoAssinouNesseAto{DateTime.Now:ddMMyyyyhhmmss}.Png";
+        //        _bmp.Save(_arquivoSave, ImageFormat.Png);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
         private void CutFingerFile()
         {
-            try
+            var _arquivo = new StreamReader(txtFileA.Text);
+            var _arquivoBytes = default(byte[]);
+
+            using (var _memoria = new MemoryStream())
             {
-                var _arquivo = new StreamReader(txtFileA.Text);
-                var _arquivoBytes = default(byte[]);
-
-                using (var _memoria = new MemoryStream())
-                {
-                    _arquivo.BaseStream.CopyTo(_memoria);
-                    _arquivoBytes = _memoria.ToArray();
-                }
-
-                Bitmap _imagemBMPInicial;
-
-                using (var _memoria = new MemoryStream(_arquivoBytes))
-                {
-                    _imagemBMPInicial = new Bitmap(_memoria);
-                }
-
-                var _imagemNova = default(Bitmap);
-                Graphics _graphics = null;
-                var _sizeImageRes = new Size(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height);
-                var _posicaoInicial = default(Point);
-                var _posicaoFinal = default(Point);
-
-                _imagemBMPInicial.SetResolution(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height);
-
-                _imagemNova = new Bitmap(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height, PixelFormat.Format24bppRgb); //estava com: Format24bppRgb
-                _imagemNova.SetResolution(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height);
-                _graphics = Graphics.FromImage(_imagemNova);
-                _graphics.Clear(Color.White);
-                _graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-
-                var _retangulo = new Rectangle(_posicaoInicial.X, _posicaoInicial.Y, _sizeImageRes.Width, _sizeImageRes.Height);
-                _graphics.DrawImage(_imagemBMPInicial, _posicaoFinal.X, _posicaoFinal.Y, _retangulo, GraphicsUnit.Pixel);
-                _imagemNova.SetResolution(_imagemBMPInicial.Size.Width, _imagemBMPInicial.Size.Height);
-
-                var _arquivoGrayScale = ConvertToGrayScale(_imagemNova);
-
-                #region Convertendo a imagem de BMP para WSQ
-
-                Bitmap _imagemBMPGrayScale;
-
-                using (var _memoria = new MemoryStream(_arquivoGrayScale))
-                {
-                    _imagemBMPGrayScale = new Bitmap(_memoria);
-                }                
-
-                var _arquivoConvertidoWSQ = Wsq.FromBitmapToWsq(_imagemBMPGrayScale, (float)0.75, _imagemBMPInicial.Size.Width, "Teste"); //75% é o padrão para compressão do arquivo
-
-                var _arquivoSaveWSQ = $"{_localArquivos}RecorteDigital/RecorteDigitalWSQ{DateTime.Now:ddMMyyyyhhmmss}.wsq";
-
-                using (var _fileStream = File.Create(_arquivoSaveWSQ))
-                {
-                    _fileStream.Write(_arquivoConvertidoWSQ, 0, _arquivoConvertidoWSQ.Length);
-                }
-
-                #endregion
+                _arquivo.BaseStream.CopyTo(_memoria);
+                _arquivoBytes = _memoria.ToArray();
             }
-            catch (Exception ex)
+
+            Bitmap _imagemBMPInicial;
+
+            using (var _memoria = new MemoryStream(_arquivoBytes))
             {
-                throw ex;
+                _imagemBMPInicial = new Bitmap(_memoria);
             }
+
+            var width = 480;
+            var height = 640;
+
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+            destImage.SetResolution(_imagemBMPInicial.HorizontalResolution, _imagemBMPInicial.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(_imagemBMPInicial, destRect, 0, 0, _imagemBMPInicial.Width, _imagemBMPInicial.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            var _arquivoSave = $"{_localArquivos}JPG480x640{DateTime.Now:ddMMyyyyhhmmss}.jfif";
+            destImage.Save(_arquivoSave, ImageFormat.Jpeg);
         }
 
         private byte[] ConvertToGrayScale(Bitmap imagem)
